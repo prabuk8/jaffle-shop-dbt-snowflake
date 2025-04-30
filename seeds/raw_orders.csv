@@ -1,0 +1,8 @@
+"id,user_id,order_date,status,amount_usd"
+"1,1,2023-01-15,completed,150.50"
+"2,2,2023-01-16,completed,75.00"
+"3,1,2023-01-18,returned,150.50"
+"4,3,2023-01-20,shipped,210.10"
+"5,4,2023-01-21,completed,55.25"
+"6,5,2023-01-22,placed,120.00"
+"7,2,2023-01-25,shipped,80.00"

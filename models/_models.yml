@@ -1,0 +1,111 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: Staged customer data. Cleaned and renamed from raw source.
+    columns:
+      - name: customer_id
+        description: The primary key for customers.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: Staged order data. Cleaned and renamed from raw source. Includes date casting.
+    columns:
+      - name: order_id
+        description: The primary key for orders.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to the customers table.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: status
+        description: "{{ doc('order_status') }}" # Example of using docs block
+      - name: order_date
+        description: The date the order was placed.
+        tests:
+          - not_null
+
+  - name: stg_payments
+    description: Staged payment data. Cleaned and renamed from raw source.
+    columns:
+      - name: payment_id
+        description: Primary key for payments.
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to the orders table.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_method
+        description: "{{ doc('payment_method') }}" # Example of using docs block
+        tests:
+          - accepted_values:
+              values: ['credit_card', 'paypal', 'gift_card', 'bank_transfer'] # Added bank_transfer for demo
+
+  - name: int_order_payments_aggregated
+    description: Aggregates payment data per order ID.
+    columns:
+      - name: order_id
+        tests:
+          - unique # Each order should only appear once
+          - not_null
+      - name: total_net_payment_amount_usd
+        tests:
+          - not_null
+
+
+  - name: dim_customers
+    description: Customer dimension table with LTV metrics. Materialized as table.
+    columns:
+      - name: customer_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_orders
+    description: Orders fact table joining orders and payments. Materialized as table.
+    columns:
+      - name: order_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships: # Ensure customers exist in the dimension table
+              to: ref('dim_customers')
+              field: customer_id
+      # Add a custom data test reference here
+      - name: total_payment_amount_usd
+        tests:
+          - custom.assert_order_payment_total_positive # Reference custom test
+
+docs:
+  - name: order_status
+    description: |
+      The status of the order. Possible values are:
+      * placed
+      * shipped
+      * completed
+      * returned
+
+  - name: payment_method
+    description: |
+      How the customer paid for the order. Can be one of:
+      * credit_card
+      * paypal
+      * gift_card
+      * bank_transfer

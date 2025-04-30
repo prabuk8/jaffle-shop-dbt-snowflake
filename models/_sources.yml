@@ -1,0 +1,50 @@
+version: 2
+
+sources:
+  - name: raw_data # This name matches the source() function's first arg
+    description: Raw data loaded from CSV files via dbt seed.
+    database: "{{ target.database }}" # Uses the database defined in your profile
+    schema: "{{ target.schema }}"   # Uses the schema defined in your profile
+    tables:
+      - name: raw_customers
+        description: Raw customer data.
+        columns:
+          - name: id
+            description: Primary key for customers.
+            tests:
+              - unique
+              - not_null
+      - name: raw_orders
+        description: Raw order data.
+        columns:
+          - name: id
+            description: Primary key for orders.
+            tests:
+              - unique
+              - not_null
+          - name: user_id
+            description: Foreign key to raw_customers.id.
+            tests:
+              - not_null
+              # - relationships: # Test relationship to raw_customers if desired
+              #     to: source('raw_data', 'raw_customers')
+              #     field: id
+          - name: status
+            tests:
+              - accepted_values:
+                  values: ['completed', 'shipped', 'returned', 'placed']
+      - name: raw_payments
+        description: Raw payment data.
+        columns:
+          - name: id
+            description: Primary key for payments.
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: Foreign key to raw_orders.id
+            tests:
+              - not_null
+              # - relationships: # Test relationship to raw_orders if desired
+              #     to: source('raw_data', 'raw_orders')
+              #     field: id

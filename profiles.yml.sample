@@ -1,0 +1,47 @@
+# DO NOT CHECK profiles.yml INTO VERSION CONTROL
+# Create your own profiles.yml based on this sample
+# Use environment variables for sensitive credentials!
+
+default: # This name must match 'profile' in dbt_project.yml
+  target: dev # Default target environment
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}" # e.g., xy12345.us-east-1
+
+      # --- Authentication ---
+      # Choose ONE method:
+      # 1. User/Password (Easiest for quick setup, use ENV VARS)
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+
+      # 2. Key Pair (More secure, recommended for automation)
+      # user: "{{ env_var('SNOWFLAKE_USER') }}"
+      # private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      # private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE', '') }}" # Optional
+
+      # 3. SSO / External Browser (Good for interactive use)
+      # user: "{{ env_var('SNOWFLAKE_USER') }}"
+      # authenticator: externalbrowser
+
+      # --- Connection Details ---
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"             # e.g., DBT_DEVELOPER_ROLE
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"   # e.g., DBT_DEVELOPMENT_WH
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"     # e.g., DBT_DEV_DB
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"         # e.g., dbt_yourname - this is the default schema dbt works in
+
+      threads: 4 # Number of parallel threads dbt can use
+      client_session_keep_alive: False
+      # query_tag: dbt # Optional: Add a query tag for monitoring in Snowflake
+
+# --- Optional: Prod target example ---
+# prod:
+#   type: snowflake
+#   account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+#   user: "{{ env_var('SNOWFLAKE_PROD_USER') }}" # Often a service account
+#   private_key_path: "{{ env_var('SNOWFLAKE_PROD_PRIVATE_KEY_PATH') }}"
+#   role: "{{ env_var('SNOWFLAKE_PROD_ROLE') }}"
+#   warehouse: "{{ env_var('SNOWFLAKE_PROD_WAREHOUSE') }}"
+#   database: "{{ env_var('SNOWFLAKE_PROD_DATABASE') }}"
+#   schema: "PRODUCTION" # Target production schema
+#   threads: 8

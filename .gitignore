@@ -1,0 +1,7 @@
+logs/
+target/
+dbt_packages/
+profiles.yml
+*.db
+*.duckdb
+.DS_Store
